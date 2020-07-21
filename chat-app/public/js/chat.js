@@ -13,15 +13,32 @@ $(function() {
     // Prompt for setting a username
     var username;
     var $currentInput = $usernameInput.focus();
-  
+    
+    var socket = io();
     // Sets the client's username
     function setUsername () {
+      username = $usernameInput.val();
 
+      if(username){
+        $loginPage.fadeOut();
+        $chatPage.show();
+
+        socket.emit('add user', username)
+      }
     }
   
     // Sends a chat message
     function sendMessage () {
-        
+        var message = $inputMessage.val();
+
+        if(message){
+          $inputMessage.val('');
+          addChatMessage({
+            username: username,
+            message: message
+          });
+          socket.emit('new message', message);
+        }
     }
   
     // Log a message
@@ -90,5 +107,14 @@ $(function() {
       }
     });
 
+    socket.on('new message', function(data){
+      console.log(data);
+      addChatMessage(data);
+    });
+
+    socket.on('user joined', function(data){
+      console.log(data.username);
+      log(data.username + ' joined');
+    });
   });
   
